@@ -34,10 +34,14 @@ jobs:
 
       - name: Create or Update Deployment
         run: |
-          # This command builds the deployment 'live' without needing a deployment.yaml file
-          kubectl create deployment spring-api \
-            --image=myjavaregistry.azurecr.io/sample-api:${{ github.sha }} \
-            --dry-run=client -o yaml | kubectl apply -f -
-          
-          # Ensure the deployment is using the new image if it already existed
-          kubectl set image deployment/spring-api spring-api=myjavaregistry.azurecr.io/sample-api:${{ github.sha }}
+            # 1. Try to apply the service first
+            kubectl apply -f k8s/test-rajula-service.yaml
+            
+            # 2. Use 'apply' with a dry-run to ensure the deployment exists with the right container name
+            # We explicitly name the container 'spring-api' here
+            kubectl create deployment spring-api \
+              --image=myjavaregistry.azurecr.io/sample-api:latest \
+              --dry-run=client -o yaml | kubectl apply -f -
+            
+            # 3. Now update the image specifically for the container named 'spring-api'
+            kubectl set image deployment/spring-api spring-api=myjavaregistry.azurecr.io/sample-api:${{ github.sha }}
