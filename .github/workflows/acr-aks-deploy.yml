@@ -41,7 +41,12 @@ jobs:
             # We explicitly name the container 'spring-api' here
             kubectl create deployment spring-api \
               --image=myjavaregistry.azurecr.io/sample-api:latest \
-              --dry-run=client -o yaml | kubectl apply -f -
+              --dry-run=client -o yaml > deployment.yaml
+            # Manually ensure the container name in the generated YAML is 'spring-api'
+            # (This handles the mismatch that caused your error)
+            sed -i 's/name: sample-api/name: spring-api/g' deployment.yaml || true
+            
+            kubectl apply -f deployment.yaml
             
             # 3. Now update the image specifically for the container named 'spring-api'
             kubectl set image deployment/spring-api spring-api=myjavaregistry.azurecr.io/sample-api:${{ github.sha }}
