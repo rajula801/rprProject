@@ -1,0 +1,43 @@
+name: ACR and AKS Deployment
+on:
+  workflow_dispatch: # This is what creates the "Run Workflow" button
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: ACR Build and Push
+        run: |
+          az acr login --name myjavaregistry
+          docker build --platform linux/amd64 -t myjavaregistry.azurecr.io/sample-api:${{ github.sha }} .
+          docker push myjavaregistry.azurecr.io/sample-api:${{ github.sha }}
+          # Also tag as latest for convenience
+          docker tag myjavaregistry.azurecr.io/sample-api:${{ github.sha }} myjavaregistry.azurecr.io/sample-api:latest
+          docker push myjavaregistry.azurecr.io/sample-api:latest
+
+      - name: Set AKS Context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: 'myJavaRG'
+          cluster-name: 'myJavaAKS'
+
+      - name: Deploy Service
+        run: kubectl apply -f k8s/test-rajula-service.yaml
+
+      - name: Create or Update Deployment
+        run: |
+          # This command builds the deployment 'live' without needing a deployment.yaml file
+          kubectl create deployment spring-api \
+            --image=myjavaregistry.azurecr.io/sample-api:${{ github.sha }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+          
+          # Ensure the deployment is using the new image if it already existed
+          kubectl set image deployment/spring-api spring-api=myjavaregistry.azurecr.io/sample-api:${{ github.sha }}
