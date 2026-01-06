@@ -18,7 +18,7 @@ spec:
           image: myjavaregistry.azurecr.io/sample-api:latest
           ports:
             - containerPort: 8080
-          # This helps AKS know if your Java app is healthy
+          # This helps AKS know if your Java app
           livenessProbe:
             httpGet:
               path: /actuator/health
