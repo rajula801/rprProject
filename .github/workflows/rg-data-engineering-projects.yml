@@ -88,4 +88,4 @@ jobs:
           namespace: ${{ env.NAMESPACE }}
           # ADD THIS LINE: It creates a temporary secret so the cluster can pull the image
           imagepullsecrets: |
-            acr-public-secret
+            acr-pull-secret
