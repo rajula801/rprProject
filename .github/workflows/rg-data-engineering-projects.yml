@@ -46,6 +46,11 @@ jobs:
 
       # Builds and pushes an image up to your Azure Container Registry
       - name: Build and push image to ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}
+          username: ${{ secrets.AZURE_ACR_USERNAME }}
+          password: ${{ secrets.AZURE_ACR_PASSWORD }}
         run: |
           # 1. Log in to ACR using the credentials already in your workflow
           echo ${{ secrets.AZURE_ACR_PASSWORD }} | docker login ${{ secrets.AZURE_ACR_LOGIN_SERVER }} -u ${{ secrets.AZURE_ACR_USERNAME }} --password-stdin
