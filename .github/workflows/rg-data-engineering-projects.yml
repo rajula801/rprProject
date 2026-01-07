@@ -15,7 +15,7 @@ env:
   DEPLOYMENT_MANIFEST_PATH: ./k8s/test-rajula-service.yaml
   DOCKER_FILE: ./Dockerfile
   BUILD_CONTEXT_PATH: ./
-  NAMESPACE: namespace-workflow-1767761653499
+  NAMESPACE: image-workflow-1767761653499
   ENABLENAMESPACECREATION: false
   AUTH_TYPE: SERVICE_PRINCIPAL
 
